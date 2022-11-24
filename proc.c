@@ -227,6 +227,7 @@ fork(void)
 void
 exit(int status_code)
 {
+  
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
@@ -241,6 +242,9 @@ exit(int status_code)
       curproc->ofile[fd] = 0;
     }
   }
+
+  // Set the exit status code
+  curproc->exit_code = status_code + 1;
 
   begin_op();
   iput(curproc->cwd);
@@ -290,6 +294,9 @@ wait(int * status_code_ptr)
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
+        if(status_code_ptr){
+          *status_code_ptr = p->exit_code; // Set the exit status code if the pointer is valid
+        }
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir, 0); // User zone deleted before

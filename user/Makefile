@@ -16,6 +16,7 @@ UPROGS=\
 	wc\
 	zombie\
 	dup2test\
+	exitwait\
 
 # Try to infer the correct TOOLPREFIX if not set
 ifndef TOOLPREFIX
@@ -50,10 +51,10 @@ LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
 # Disable PIE when possible (for Ubuntu 16.10 toolchain)
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]no-pie'),)
-CFLAGS += -fno-pie -no-pie
+CFLAGS += -fno-pie -no-pie 
 endif
 ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
-CFLAGS += -fno-pie -nopie
+CFLAGS += -fno-pie -nopie 
 endif
 
 # Disable implicit rule
