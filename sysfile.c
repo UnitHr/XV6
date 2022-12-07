@@ -67,28 +67,6 @@ sys_dup(void)
 }
 
 int
-sys_dup2(void){
- struct file *oldfile;
- int oldfd, newfd;
-
- //argfd looks if the oldfile is opened, ask for the new file
- if(argfd(0, &oldfd, &oldfile) < 0 || argint(1, &newfd) < 0 || newfd < 0 || newfd >= NOFILE) 
-	return -1;
- 
- //if the oldfd is the same that newfd, return that value
- if(oldfd == newfd)
-	return oldfd;
-
- //if there are a open file in newfd close it, fileclose decrese or close the file
- if(myproc()->ofile[newfd])
-	fileclose(myproc()->ofile[newfd]);
-
- //copy the file on the newfd, filedup increases the counter of the file
- myproc()->ofile[newfd] = filedup(oldfile);
- return newfd;
-}
-
-int
 sys_read(void)
 {
   struct file *f;

@@ -16,24 +16,14 @@ sys_fork(void)
 int
 sys_exit(void)
 {
-  
-  int status;
-  if(argint(0, &status) < 0)
-    return -1;
-  status = (status << 8) - 1;
-  exit(status);
+  exit();
   return 0;  // not reached
 }
 
 int
 sys_wait(void)
 {
-
-  int *status;
-  if(argptr(0, (void*)&status, sizeof(*status)) < 0)
-    return -1;
-  return wait(status);
-
+  return wait();
 }
 
 int
@@ -44,17 +34,6 @@ sys_kill(void)
   if(argint(0, &pid) < 0)
     return -1;
   return kill(pid);
-}
-
-int
-sys_date(void)
-{
- struct rtcdate* d;
-
- if(argptr(0, (void **) &d, sizeof(struct rtcdate)) < 0 )
-	 return -1;
- cmostime(d);
- return 0;
 }
 
 int

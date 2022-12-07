@@ -8,7 +8,6 @@
 #include "traps.h"
 #include "spinlock.h"
 
-
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -37,16 +36,13 @@ idtinit(void)
 void
 trap(struct trapframe *tf)
 {
-  
   if(tf->trapno == T_SYSCALL){
     if(myproc()->killed)
-     {
-       exit(tf->trapno);
-    }
+      exit();
     myproc()->tf = tf;
     syscall();
     if(myproc()->killed)
-      exit(tf->trapno);
+      exit();
     return;
   }
 
@@ -102,7 +98,7 @@ trap(struct trapframe *tf)
   // (If it is still executing in the kernel, let it keep running
   // until it gets to the regular system call return.)
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
-    exit(tf->trapno);
+    exit();
 
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
@@ -112,5 +108,5 @@ trap(struct trapframe *tf)
 
   // Check if the process has been killed since we yielded
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
-    exit(tf->trapno);
+    exit();
 }

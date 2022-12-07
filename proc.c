@@ -225,9 +225,8 @@ fork(void)
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
 void
-exit(int status_code)
+exit(void)
 {
-  
   struct proc *curproc = myproc();
   struct proc *p;
   int fd;
@@ -242,9 +241,6 @@ exit(int status_code)
       curproc->ofile[fd] = 0;
     }
   }
-
-  // Set the exit status code
-  curproc->exit_code = status_code + 1;
 
   begin_op();
   iput(curproc->cwd);
@@ -277,7 +273,7 @@ exit(int status_code)
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
-wait(int * status_code_ptr)
+wait(void)
 {
   struct proc *p;
   int havekids, pid;
@@ -294,9 +290,6 @@ wait(int * status_code_ptr)
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
-        if(status_code_ptr){
-          *status_code_ptr = p->exit_code; // Set the exit status code if the pointer is valid
-        }
         kfree(p->kstack);
         p->kstack = 0;
         freevm(p->pgdir, 0); // User zone deleted before
