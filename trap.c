@@ -107,9 +107,9 @@ trap(struct trapframe *tf)
         cprintf("allocvm out of memory");
         myproc()->killed = 1;
       }else{
-        memset((char*)pa, 0, PGSIZE);
+        memset(pa, 0, PGSIZE);
         mappages(myproc()->pgdir, (char*)va, PGSIZE, V2P(pa), PTE_W|PTE_U);
-        break;
+        return;
       }
     }
 
