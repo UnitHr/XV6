@@ -17,6 +17,7 @@ UPROGS=\
 	zombie\
 	dup2test\
 	exitwait\
+	testCode\
 
 # Try to infer the correct TOOLPREFIX if not set
 ifndef TOOLPREFIX

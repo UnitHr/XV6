@@ -33,6 +33,7 @@ struct context {
 };
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+enum proc_prio { LOW, HIGH };
 
 // Per-process state
 struct proc {
@@ -50,6 +51,7 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   unsigned int exit_code;      // Exit code of the process
+  enum proc_prio prio;         // Process priority
 };
 
 // Process memory is laid out contiguously, low addresses first:
