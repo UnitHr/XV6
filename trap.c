@@ -95,7 +95,7 @@ trap(struct trapframe *tf)
 
     // In user space, assume process misbehaved.
     // rcv2() is the address of the page fault
-    if(rcr2() > myproc()->sz)
+    if(rcr2() > myproc()->sz || rcr2() < 0 || rcr2() < PGROUNDDOWN(myproc()->tf->esp))
       cprintf("Page fault: %d out of process range. \n", rcr2());
 
     else if(tf->trapno == T_PGFLT){
@@ -111,6 +111,7 @@ trap(struct trapframe *tf)
         mappages(myproc()->pgdir, (char*)va, PGSIZE, V2P(pa), PTE_W|PTE_U);
         return;
       }
+      cprintf("page %d allocated:", rcr2());
     }
 
     

@@ -66,23 +66,27 @@ sys_getpid(void)
 int
 sys_sbrk(void)
 {
-  int addr;                 //Old size of the process
+  int oldAddr;                 //Old size of the process
   int n;
 
   if(argint(0, &n) < 0)
     return -1;
   
-  addr = myproc()->sz;
+  oldAddr = myproc()->sz;
+
+  if(myproc()->sz + n > KERNBASE)
+    return -1;
+    
   myproc()->sz += n;        //New size of the process
 
   if(n < 0 ){
-    if(deallocuvm(myproc()->pgdir, addr, myproc()->sz) == 0){
+    if(deallocuvm(myproc()->pgdir, oldAddr, myproc()->sz) == 0){
       cprintf("sbrk failed\n");
       return -1;
     }
   }
-
-  return addr;
+  lcr3(V2P(myproc()->pgdir));  // Invalidate TLB.
+  return oldAddr;
 }
 
 int
