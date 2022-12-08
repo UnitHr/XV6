@@ -14,7 +14,7 @@
 int
 main(int argc, char *argv[])
 {
-  srbk(-66000);
+  sbrk(-66000);
   /*int * n = malloc(sizeof(int));
   sbrk(-sizeof(int));
   *n = 4;*/

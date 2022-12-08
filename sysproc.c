@@ -73,6 +73,12 @@ sys_sbrk(void)
     return -1;
   addr = myproc()->sz;
   myproc()->sz += n;        //New size of the process
+
+  if(n < 0 && (deallocuvm(myproc()->pgdir, addr, addr - n) == 0)){
+    cprintf("sbrk failed\n");
+    return -1;
+  }
+
   return addr;
 }
 
