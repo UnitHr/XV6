@@ -66,14 +66,13 @@ sys_getpid(void)
 int
 sys_sbrk(void)
 {
-  int addr;
+  int addr;                 //Old size of the process
   int n;
 
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+  myproc()->sz += n;        //New size of the process
   return addr;
 }
 
