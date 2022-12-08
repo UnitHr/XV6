@@ -189,6 +189,8 @@ fork(void)
     return -1;
   }
 
+  
+
   // Copy process state from proc.
   if((np->pgdir = copyuvm(curproc->pgdir, curproc->sz)) == 0){
     kfree(np->kstack);
@@ -198,7 +200,9 @@ fork(void)
   }
   np->sz = curproc->sz;
   np->parent = curproc;
+  np->prio = curproc->prio;
   *np->tf = *curproc->tf;
+
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
@@ -207,7 +211,6 @@ fork(void)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
   np->cwd = idup(curproc->cwd);
-
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
@@ -217,7 +220,6 @@ fork(void)
   np->state = RUNNABLE;
 
   release(&ptable.lock);
-
   return pid;
 }
 
@@ -342,14 +344,15 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
       if (p->prio != HIGH || p->state != RUNNABLE)
         continue;
-
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
+
       c->proc = p;
       switchuvm(p);
       p->state = RUNNING;
