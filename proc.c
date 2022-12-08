@@ -295,7 +295,6 @@ wait(int * status_code_ptr)
         // Found one.
         pid = p->pid;
         if(status_code_ptr){
-           // Set the exit status code using copyout
           copyout(curproc->pgdir, (uint)status_code_ptr, (char *)&p->exit_code, sizeof(int));
         }
         kfree(p->kstack);
