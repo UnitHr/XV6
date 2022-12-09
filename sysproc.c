@@ -74,9 +74,9 @@ sys_sbrk(void)
   
   oldAddr = myproc()->sz;
 
-  if(myproc()->sz + n > KERNBASE)
+  if(myproc()->sz + n > KERNBASE || myproc()->sz + n < 0)
     return -1;
-    
+
   myproc()->sz += n;        //New size of the process
 
   if(n < 0 ){
