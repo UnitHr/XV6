@@ -294,8 +294,9 @@ wait(int * status_code_ptr)
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
-        if(status_code_ptr){
-          *status_code_ptr = p->exit_code; // Set the exit status code if the pointer is valid
+        if (status_code_ptr)
+        {
+          copyout(curproc->pgdir, (uint)status_code_ptr, (char *)&p->exit_code, sizeof(int));
         }
         kfree(p->kstack);
         p->kstack = 0;
