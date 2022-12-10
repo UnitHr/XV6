@@ -6,11 +6,16 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
-
-struct {
+struct proc_table {
   struct spinlock lock;
   struct proc proc[NPROC];
+  struct proc * running_queue[NPROC];
+  int high_queue_size;
+  int low_queue_size;
 } ptable;
+
+
+void addToSchedulerQueue(struct proc *p, struct proc_table * ptable );
 
 static struct proc *initproc;
 
@@ -23,6 +28,8 @@ static void wakeup1(void *chan);
 void
 pinit(void)
 {
+  ptable.high_queue_size = 0;
+  ptable.low_queue_size = 0;
   initlock(&ptable.lock, "ptable");
 }
 
@@ -148,7 +155,7 @@ userinit(void)
   // because the assignment might not be atomic.
   acquire(&ptable.lock);
 
-  p->state = RUNNABLE;
+  addToSchedulerQueue(p, &ptable );
 
   release(&ptable.lock);
 }
@@ -217,7 +224,7 @@ fork(void)
 
   acquire(&ptable.lock);
 
-  np->state = RUNNABLE;
+  addToSchedulerQueue(np, &ptable );
 
   release(&ptable.lock);
   return pid;
@@ -324,6 +331,21 @@ wait(int * status_code_ptr)
   }
 }
 
+//Add to the scheduler queue
+/* MUST BE CALLED WHILE LOCKED */
+void addToSchedulerQueue(struct proc *p, struct proc_table * ptable ){
+  int index;
+  if( p->prio == HI_PRIO ){
+    index = ptable->high_queue_size;
+    ptable->high_queue_size++;
+  } else {
+    index = NPROC - 1 - ptable->low_queue_size;
+    ptable->low_queue_size++;
+  }
+  ptable->running_queue[index] = p;
+  p->state = RUNNABLE;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -332,6 +354,7 @@ wait(int * status_code_ptr)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+
 void
 scheduler(void)
 {
@@ -339,51 +362,42 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
 
-  for(;;){
+  for (;;)
+  {
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    int index = -1;
+
+    if (ptable.high_queue_size > 0)
     {
-      if (p->prio != HI_PRIO || p->state != RUNNABLE)
-        continue;
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
-
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+      index = ptable.high_queue_size - 1;
+      ptable.high_queue_size--;
+    }
+    else if (ptable.low_queue_size > 0)
+    {
+      index = NPROC - ptable.low_queue_size;
+      ptable.low_queue_size--;
     }
 
-    for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    if (index != -1)
     {
-      if (p->state != RUNNABLE)
-        continue;
+      p = ptable.running_queue[index];
+      if (p->state == RUNNABLE)
+      {
+        c->proc = p;
+        switchuvm(p);
+        p->state = RUNNING;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+        swtch(&(c->scheduler), p->context);
+        switchkvm();
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
-
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+        // Process is done running for now.
+        // It should have changed its p->state before coming back.
+        c->proc = 0;
+      }
     }
 
     release(&ptable.lock);
@@ -421,7 +435,7 @@ void
 yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
-  myproc()->state = RUNNABLE;
+  addToSchedulerQueue(myproc(), &ptable );
   sched();
   release(&ptable.lock);
 }
@@ -496,7 +510,7 @@ wakeup1(void *chan)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == SLEEPING && p->chan == chan)
-      p->state = RUNNABLE;
+      addToSchedulerQueue(p, &ptable );
 }
 
 // Wake up all processes sleeping on chan.
@@ -522,7 +536,7 @@ kill(int pid)
       p->killed = 1;
       // Wake process from sleep if necessary.
       if(p->state == SLEEPING)
-        p->state = RUNNABLE;
+        addToSchedulerQueue(p, &ptable );
       release(&ptable.lock);
       return 0;
     }
