@@ -121,7 +121,7 @@ int             wait(int*);
 void            wakeup(void*);
 void            yield(void);
 enum proc_prio  getprio(int);
-int             setprio(int, enum proc_prio);
+int             setprio(int, enum proc_prio *);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

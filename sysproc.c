@@ -82,7 +82,7 @@ sys_getprio(void){
   int pid;
   if(argint(0, &pid) < 0)
     return -1;
-  if( getprio(pid) == LOW){
+  if( getprio(pid) == NORM_PRIO){
     return 0;
   } else {
     return 1;
@@ -90,17 +90,19 @@ sys_getprio(void){
   return -1;
 }
 
-int 
-sys_setprio(void){
+int sys_setprio(void)
+{
   int pid;
-  int prio;
-  if(argint(0, &pid) < 0)
+  enum proc_prio *prio;
+  if (argint(0, &pid) < 0)
     return -1;
-  if(argint(1, &prio) < 0){
+
+  // Fetch proc_prio from arg
+
+  if (argptr(1, (void *)&prio, sizeof(prio)) < 0)
     return -1;
-  }
-  enum proc_prio p = prio == 0 ? LOW : HIGH;
-  return setprio(pid, p);
+  
+  return setprio(pid, prio);
 }
 
 int

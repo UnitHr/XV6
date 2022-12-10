@@ -87,7 +87,7 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
-  p->prio = LOW;
+  p->prio = NORM_PRIO;
   p->pid = nextpid++;
   release(&ptable.lock);
 
@@ -347,7 +347,7 @@ scheduler(void)
     
     for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     {
-      if (p->prio != HIGH || p->state != RUNNABLE)
+      if (p->prio != HI_PRIO || p->state != RUNNABLE)
         continue;
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -580,7 +580,7 @@ enum proc_prio getprio(int pid){
   return -1;
 }
 
-int setprio(int pid, enum proc_prio prio)
+int setprio(int pid, enum proc_prio * prio)
 {
   struct proc *p;
   acquire(&ptable.lock);
@@ -588,7 +588,7 @@ int setprio(int pid, enum proc_prio prio)
   {
     if (p->pid == pid)
     {
-      p->prio = prio;
+      p->prio = *prio;
       release(&ptable.lock);
       return 0;
     }
