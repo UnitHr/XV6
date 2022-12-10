@@ -93,16 +93,20 @@ sys_getprio(void){
 int sys_setprio(void)
 {
   int pid;
-  enum proc_prio *prio;
+  int prio; 
+  /*
+    Note 
+    Enumerated types are integer types, and as such can be used anywhere other integer types can, including in implicit conversions and arithmetic operators. 
+    Reference: https://en.cppreference.com/w/c/language/enum (C Reference -- Date: 2022-12-1)
+  */
   if (argint(0, &pid) < 0)
     return -1;
 
-  // Fetch proc_prio from arg
-
-  if (argptr(1, (void *)&prio, sizeof(prio)) < 0)
+  if (argint(1, &prio) < 0){
     return -1;
-  
-  return setprio(pid, prio);
+  }
+
+  return setprio(pid, (enum proc_prio) prio);
 }
 
 int

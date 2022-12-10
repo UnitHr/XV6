@@ -580,7 +580,7 @@ enum proc_prio getprio(int pid){
   return -1;
 }
 
-int setprio(int pid, enum proc_prio * prio)
+int setprio(int pid, enum proc_prio prio)
 {
   struct proc *p;
   acquire(&ptable.lock);
@@ -588,7 +588,7 @@ int setprio(int pid, enum proc_prio * prio)
   {
     if (p->pid == pid)
     {
-      p->prio = *prio;
+      p->prio = prio;
       release(&ptable.lock);
       return 0;
     }
