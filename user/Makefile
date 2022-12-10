@@ -18,6 +18,11 @@ UPROGS=\
 	dup2test\
 	exitwait\
 	testCode\
+	tsbrk1\
+	tsbrk2\
+	tsbrk3\
+	tsbrk4\
+	tsbrk5\
 	tprio1\
 	tprio2\
 	tprio3\

@@ -15,6 +15,8 @@ extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
 
+extern int mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm);
+
 void
 tvinit(void)
 {
@@ -90,6 +92,32 @@ trap(struct trapframe *tf)
               tf->trapno, cpuid(), tf->eip, rcr2());
       panic("trap");
     }
+
+    // In user space, assume process misbehaved.
+    // rcv2() is the address of the page fault
+    if(rcr2() > myproc()->sz || rcr2() < PGROUNDUP(myproc()->tf->esp))
+      cprintf("Page fault: %d out of process range. \n", rcr2());
+
+    else if(tf->trapno == T_PGFLT){
+      
+      uint va = PGROUNDDOWN(rcr2());
+      char *pa = kalloc();
+      
+      if(pa == 0){
+        cprintf("allocvm out of memory");
+        myproc()->killed = 1;
+      }else{
+        memset(pa, 0, PGSIZE);
+        if(mappages(myproc()->pgdir, (char*)va, PGSIZE, V2P(pa), PTE_W|PTE_U) < 0){
+          cprintf("mappages out of memory");
+          kfree(pa);
+          myproc()->killed = 1;
+        } 
+        return;
+      }
+    }
+
+    
     // In user space, assume process misbehaved.
     cprintf("pid %d %s: trap %d err %d on cpu %d "
             "eip 0x%x addr 0x%x--kill proc\n",
