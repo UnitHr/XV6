@@ -94,7 +94,12 @@ sys_getprio(void){
   int pid;
   if(argint(0, &pid) < 0)
     return -1;
-  return getprio(pid);
+  if( getprio(pid) == NORM_PRIO){
+    return 0;
+  } else {
+    return 1;
+  }
+  return -1;
 }
 
 int sys_setprio(void)
