@@ -252,7 +252,7 @@ exit(int status_code)
   }
 
   // Set the exit status code
-  curproc->exit_code = status_code + 1;
+  curproc->exit_code = status_code;
 
   begin_op();
   iput(curproc->cwd);
