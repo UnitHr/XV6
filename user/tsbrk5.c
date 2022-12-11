@@ -14,7 +14,7 @@ void test1()
 void test2()
 {
   // Página de guarda:
-  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar:\n");
+  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar1:\n");
   char* a = (char*)((int)&i + 4095);
   printf (1, "%d\n", a);
   *a = 1;
