@@ -11,10 +11,7 @@
 int
 main(void)
 {
-  enum proc_prio prio = getprio(getpid());
-  printf("%d %d", getpid(), prio);
-  if(fork()) setprio(getpid(), HI_PRIO);
-  enum proc_prio prio = getprio(getpid());
+  printf(1, "NOT IMPLEMENTED");
   exit(0);
 }
 
