@@ -72,11 +72,11 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   
-  oldAddr = myproc()->sz;
 
-  if(myproc()->sz + n > KERNBASE || myproc()->sz + n < 0)
+  if(myproc()->sz + n >= KERNBASE || myproc()->sz + n < PGROUNDUP(myproc()->tf->esp))
     return -1;
 
+  oldAddr = myproc()->sz;
   myproc()->sz += n;        //New size of the process
 
   if(n < 0 ){
