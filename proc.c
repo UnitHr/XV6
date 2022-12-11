@@ -94,7 +94,6 @@ allocproc(void)
 
 found:
   p->state = EMBRYO;
-  p->prio = NORM_PRIO;
   p->pid = nextpid++;
   release(&ptable.lock);
 
@@ -331,20 +330,30 @@ wait(int * status_code_ptr)
   }
 }
 
+
+
 //Add to the scheduler queue
 /* MUST BE CALLED WHILE LOCKED */
 void addToSchedulerQueue(struct proc *p, struct proc_table * ptable ){
   int index;
+  int rand;
   if( p->prio == HI_PRIO ){
     index = ptable->high_queue_size;
     ptable->high_queue_size++;
+    int max = index;
+    rand = ticks % (max + 1);
   } else {
     index = NPROC - 1 - ptable->low_queue_size;
     ptable->low_queue_size++;
+    int max = NPROC -1;
+    int min = index;
+    rand = (ticks % (max - min + 1)) + min;
   }
-  ptable->running_queue[index] = p;
+  ptable->running_queue[index] = ptable->running_queue[rand];
+  ptable->running_queue[rand] = p;
   p->state = RUNNABLE;
 }
+
 
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
