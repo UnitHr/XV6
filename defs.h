@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+enum proc_prio;
 
 // bio.c
 void            binit(void);
@@ -120,7 +121,7 @@ void            userinit(void);
 int             wait(int*);
 void            wakeup(void*);
 void            yield(void);
-enum proc_prio  getprio(int);
+int             getprio(int);
 int             setprio(int, enum proc_prio);
 
 // swtch.S

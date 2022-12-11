@@ -591,13 +591,13 @@ procdump(void)
   }
 }
 
-enum proc_prio getprio(int pid){
+int getprio(int pid){
   struct proc *p;
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->pid == pid){
       release(&ptable.lock);
-      return p->prio;
+      return (int) p->prio;
     }
   }
   release(&ptable.lock);
