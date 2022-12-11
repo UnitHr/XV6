@@ -38,9 +38,9 @@ main(int argc, char *argv[])
   test1();
 
   // Guarda
-  test2();
+  test2(); 
 
-  // Núcleo
+  //Núcleo
   test3();
 
   exit (0);
