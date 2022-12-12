@@ -112,7 +112,7 @@ int sys_setprio(void)
   if (argint(1, &prio) < 0){
     return -1;
   }
-  if(prio != HI_PRIO || prio != NORM_PRIO)
+  if(prio != HI_PRIO && prio != NORM_PRIO)
     return -1;
   return setprio(pid, (enum proc_prio) prio);
 }
