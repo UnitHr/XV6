@@ -14,7 +14,7 @@ void test1()
 void test2()
 {
   // Página de guarda:
-  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar1:\n");
+  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar (1):\n");
   char* a = (char*)((int)&i + 4095);
   printf (1, "%d\n", a);
   *a = 1;
@@ -23,7 +23,7 @@ void test2()
 void test3()
 {
   // Acceder al núcleo
-  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar:\n");
+  printf (1, "Si no fallo antes (mal), ahora tambien debe fallar (2):\n");
   char* a = (char*)0x80000001;
   *(a+1) = 1;  // Debe fallar (si lo anterior no ha fallado)
 }

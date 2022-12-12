@@ -9,13 +9,11 @@
 struct proc_table {
   struct spinlock lock;
   struct proc proc[NPROC];
-  struct proc * running_queue[NPROC];
-  int high_queue_size;
-  int low_queue_size;
+  struct proc * running_queue[NPROC];     // No se usa. Está para exponer la alternativa del scheduler mencionado en la memoria 
+  int high_queue_size;                    // No se usa. Está para exponer la alternativa del scheduler mencionado en la memoria
+  int low_queue_size;                     // No se usa. Está para exponer la alternativa del scheduler mencionado en la memoria                                  
 } ptable;
 
-
-void addToSchedulerQueue(struct proc *p, struct proc_table * ptable );
 
 static struct proc *initproc;
 
@@ -24,6 +22,9 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
+
+//Descomentar la implementación en el caso de visualizar la alternativa del scheduler
+void addToSchedulerQueue(struct proc *p, struct proc_table * ptable );
 
 void
 pinit(void)
@@ -415,6 +416,8 @@ scheduler(void)
 }
 */
 
+
+//Comentar y descomentar la otra alternativa en caso de querer visualizar su funcionamiento
 void
 scheduler(void)
 {
