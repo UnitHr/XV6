@@ -86,26 +86,40 @@ trap(struct trapframe *tf)
 
   case T_PGFLT:
 
+    //Page fault caused by a protection violation
+    if((myproc()->tf->err & PTE_P) == 1){
+      cprintf("Page fault: 0x%x already present. Must be a page-protection violation \n", rcr2());
+      myproc()->killed = 1;
+      break;
+    }
+
+    //Page fault caused by a non-present page
+    //Check if the faulting address is in the process range
     if(rcr2() > myproc()->sz || rcr2() < PGROUNDUP(myproc()->tf->esp)){
       cprintf("Page fault: 0x%x out of process range. \n", rcr2());
       myproc()->killed = 1;
       break;
     }
+
+    //Allocate a page and map it to the faulting address
     uint va = PGROUNDDOWN(rcr2());
     char *pa = kalloc();
 
-
+    //Check if the allocation was successful
     if(pa == 0)
     {
       cprintf("Out of memory");
       myproc()->killed = 1;
+
     }else{
+      //map the page to the faulting address
       memset(pa, 0, PGSIZE);
       if(mappages(myproc()->pgdir, (void*)va, PGSIZE, V2P(pa), PTE_W|PTE_U) < 0){
         cprintf("mappages failed");
         kfree(pa);
         myproc()->killed = 1;
       }
+      
       // cprintf("pid %d %s: trap %d err %d on cpu %d "
       //       "eip 0x%x addr 0x%x--kill proc\n",
       //       myproc()->pid, myproc()->name, tf->trapno,
